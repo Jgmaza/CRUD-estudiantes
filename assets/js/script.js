@@ -143,7 +143,7 @@ function modificar_registro() {
             btn_crear.style.display = "none"
             est = array_est.find(item => item.id === btn.parentElement.parentElement.firstElementChild.innerHTML)
             console.log(est)
-            console.log(document.getElementById("nombre").innerHTML = est.nombre) 
+            console.log(document.getElementById("nombre").value = est.nombre) 
         })
     });
 }

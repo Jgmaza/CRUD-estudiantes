@@ -1,4 +1,5 @@
 let estudiantes = window.localStorage.getItem('estudiantes')
+let array_est = JSON.parse(estudiantes)
 
 if (estudiantes != null) {
     estudiantes = JSON.parse(estudiantes)
@@ -71,12 +72,13 @@ btn_enviar.addEventListener('click', () => {
         window.localStorage.setItem('estudiantes', JSON.stringify(estudiantes))
     }
 
-    
+
     insertar_fila(estudiante)
 
-    
+
     cancelar_info.click()
 })
+
 
 function insertar_fila(estudiante) {
     let template_registro = `
@@ -125,15 +127,31 @@ function eliminar_registro() {
 
     btns_eliminar.forEach(btn => {
         btn.addEventListener('click', (e) => {
+            array_est = array_est.filter(item => item.id !== btn.parentElement.parentElement.firstElementChild.innerHTML)
+            window.localStorage.setItem("estudiantes", array_est)
             btn.parentElement.parentElement.remove()
+        })
+
+    });
+}
+function modificar_registro() {
+    let btns_modificar = document.querySelectorAll('.modificar')
+
+    btns_modificar.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            form_crear.style.display = "block"
+            btn_crear.style.display = "none"
+            est = array_est.find(item => item.id === btn.parentElement.parentElement.firstElementChild.innerHTML)
+            console.log(est)
+            console.log(document.getElementById("nombre").innerHTML = est.nombre) 
         })
     });
 }
-
+modificar_registro()
 eliminar_registro()
 
 function uuidv4() {
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
-  }
+}

@@ -1,6 +1,5 @@
 let estudiantes = window.localStorage.getItem('estudiantes')
-let array_est = JSON.parse(estudiantes)
-
+var id_temp = ""
 if (estudiantes != null) {
     estudiantes = JSON.parse(estudiantes)
 
@@ -30,10 +29,12 @@ let cancelar_info = document.getElementById('cancelar_info')
 cancelar_info.addEventListener('click', () => {
     form_crear.style.display = "none"
     btn_crear.style.display = "block"
-
+    id_temp = "";
     recorrerInputs(element => {
         element.value = ''
+        element.disabled = false;
     })
+
 
     //console.log(vector_inputs);
 })
@@ -56,7 +57,7 @@ btn_enviar.addEventListener('click', () => {
     })
 
     estudiante = {
-        id: uuidv4(),
+        id: id_temp !== "" ? id_temp : uuidv4(),
         ...estudiante
     }
 
@@ -66,7 +67,7 @@ btn_enviar.addEventListener('click', () => {
         window.localStorage.setItem('estudiantes', JSON.stringify([estudiante]))
     } else {
         estudiantes = JSON.parse(estudiantes)
-
+        estudiantes = estudiantes.filter(item => item.id !== estudiante.id)
         estudiantes.push(estudiante)
 
         window.localStorage.setItem('estudiantes', JSON.stringify(estudiantes))
@@ -81,7 +82,8 @@ btn_enviar.addEventListener('click', () => {
 
 
 function insertar_fila(estudiante) {
-    let template_registro = `
+    if (id_temp == "") {
+        let template_registro = `
         <tr>
             <td>${estudiante.id}</td>
             <td>${estudiante.correo}</td>
@@ -94,12 +96,33 @@ function insertar_fila(estudiante) {
         </tr>
     `
 
-    let tbody = document.querySelector('tbody')
+        let tbody = document.querySelector('tbody')
 
-    //tbody.appendChild(template_registro)
+        //tbody.appendChild(template_registro)
 
-    tbody.innerHTML = tbody.innerHTML + template_registro
-
+        tbody.innerHTML = tbody.innerHTML + template_registro
+    } else {
+        let trs = document.querySelectorAll("tr")
+        trs.forEach(element => {
+            if (element.firstElementChild.innerHTML == id_temp) {
+                
+                element.innerHTML = `
+                
+                    <td>${estudiante.id}</td>
+                    <td>${estudiante.correo}</td>
+                    <td>${estudiante.apellido}</td>
+                    <td>
+                        <button class="detalles">Detalles</button>
+                        <button class="modificar">Modificar</button>
+                        <button class="eliminar">Eliminar</button>
+                    </td>
+                
+            `
+            }
+        });
+    }
+    detalles_registro()
+    modificar_registro()
     eliminar_registro()
 }
 
@@ -127,13 +150,27 @@ function eliminar_registro() {
 
     btns_eliminar.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            array_est = array_est.filter(item => item.id !== btn.parentElement.parentElement.firstElementChild.innerHTML)
-            window.localStorage.setItem("estudiantes", array_est)
-            btn.parentElement.parentElement.remove()
+
+            try {
+                let estudiantes = window.localStorage.getItem('estudiantes')
+                estudiantes = JSON.parse(estudiantes)
+
+                est = estudiantes.filter(item => item.id !== btn.parentElement.parentElement.firstElementChild.innerHTML)
+                console.log(est)
+                if (est.length == 0) {
+                    window.localStorage.clear()
+                } else {
+                    window.localStorage.setItem("estudiantes", JSON.stringify(est))
+                }
+                btn.parentElement.parentElement.remove()
+            } catch {
+                console.log("No se puede")
+            }
         })
 
     });
 }
+
 function modificar_registro() {
     let btns_modificar = document.querySelectorAll('.modificar')
 
@@ -141,12 +178,45 @@ function modificar_registro() {
         btn.addEventListener('click', (e) => {
             form_crear.style.display = "block"
             btn_crear.style.display = "none"
-            est = array_est.find(item => item.id === btn.parentElement.parentElement.firstElementChild.innerHTML)
-            console.log(est)
-            console.log(document.getElementById("nombre").value = est.nombre) 
+            let estudiantes = window.localStorage.getItem('estudiantes')
+            estudiantes = JSON.parse(estudiantes)
+            est = estudiantes.find(item => item.id === btn.parentElement.parentElement.firstElementChild.innerHTML)
+            id_temp = est.id
+            document.getElementById("nombre").value = est.nombre
+            document.getElementById("apellido").value = est.apellido
+            document.getElementById("cedula").value = est.cedula
+            document.getElementById("correo").value = est.correo
+            document.getElementById("pass").value = est.pass
+            document.getElementById("confirm_pass").value = est.confirm_pass
         })
     });
 }
+
+function detalles_registro() {
+    let btns_detalles = document.querySelectorAll('.detalles')
+
+    btns_detalles.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            form_crear.style.display = "block"
+            btn_crear.style.display = "none"
+            let estudiantes = window.localStorage.getItem('estudiantes')
+            estudiantes = JSON.parse(estudiantes)
+            est = estudiantes.find(item => item.id === btn.parentElement.parentElement.firstElementChild.innerHTML)
+            recorrerInputs(input => {
+                input.setAttribute('disabled', false);
+            })
+            document.getElementById("nombre").value = est.nombre
+
+            document.getElementById("apellido").value = est.apellido
+            document.getElementById("cedula").value = est.cedula
+            document.getElementById("correo").value = est.correo
+            document.getElementById("pass").value = est.pass
+            document.getElementById("confirm_pass").value = est.confirm_pass
+        })
+    });
+}
+
+detalles_registro()
 modificar_registro()
 eliminar_registro()
 
